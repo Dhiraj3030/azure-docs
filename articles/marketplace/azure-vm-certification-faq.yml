@@ -155,6 +155,10 @@ sections:
           | 2 | Bash history test case | An error occurs if the size of the Bash history in your submitted image is more than 1 kilobyte (KB). The size is restricted to 1 KB to ensure that your Bash history file doesn't contain any potentially sensitive information. | Resolve by mounting the VHD to another working VM and make changes to reduce the size to 1 KB or less. For example, delete the `.bash_history` files. |
           | 3 | Required kernel parameter test case | You'll receive this error when the value for `console` isn't set to `ttyS0`. Check by running the following command: <br /> `cat /proc/cmdline` | Set the value for `console` to `ttyS0`, and resubmit the request. |
           | 4 | ClientAlive interval test case | If the toolkit gives you a failed result for this test case, there's an inappropriate value for `ClientAliveInterval`. | Set the value for `ClientAliveInterval` to less than or equal to 235, and then resubmit the request. |
+          | 5 | smoke_test | You'll receive an error when the image can't boot or reboot because of a kernel panic. You can get some call trace information of the kernel panic from 'error description'.  If you want to see the whole call trace and the serial log, you can deploy a VM in Azure using your image and check the 'Serial console' in your VM resource in the Azure Portal.  | When you create a VM in Azure, you can download the serial console log from the Azure portal (You can refer to https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/serial-console-linux for more details about Serial Console) |
+          | 6 | verify_dns_name_resolution |This test case checks DNS name resolution by executing command:ping bing.com -c 5 -i 0.5 -O. An error occurs if it fails to ping a public web address 'bing.com'.  | Please refer to https://learn.microsoft.com/en-us/azure/virtual-machines/linux/azure-dns to add the right settings |
+          | 7 | verify_no_pre_exist_users | You'll receive error ‘Password of user XXXX is detected’ when the password of some user has been detected or when the key of some user has been detected | check /etc/shadow file to see if it has a password of some user, if so, you need to delete the password and Please delete the '{user's home directory}/.ssh/authorized_keys' file following the error message |
+          | 8 | validate_netvsc_reload | You will receive error ‘failed. SSHException: SSH session not active’  if the VM can't be connected after running below command. You will receive error ‘found kernel panic from the node of xx.’  if there is kernel panic found from the VM after running the command: 'modprobe -r hv_netvsc; modprobe hv_netvsc;ip link set eth0 down; ip link set eth0 up;dhclient -r eth0; dhclient eth0 ' | Check the Serial Console to see if any error happened during the period of running above command. You can visit https://learn.microsoft.com/en-us/windows-hardware/drivers/network/sr-iov-synthetic-data-path for more details about Network Virtual Service Client (NetVSC). |
           
           ### Windows test cases
 
@@ -623,6 +627,9 @@ sections:
           - Python version above 2.6+ 
           
           For more information, please visit [VM Extension](../virtual-machines/extensions/diagnostics-linux.md).
+
+          ### Verification of integrity of image 
+          If you are creating an image and creating disc out of the image to verify the integrity of the image, please note that first 1MB is reserved for optimized performance and  last 512 bytes are reserved for VHD footer. So please ignore them while verifying the integrity of the image. 
                
 additionalContent: |
 
